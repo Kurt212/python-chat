@@ -23,6 +23,7 @@ class GUIVisual(Visual):
         self.chat_box.insert(tkinter.END, result + "\n")
 
         self.chat_box.configure(state="disabled")
+        self.chat_box.see(tkinter.END)
 
 
 
