@@ -1,10 +1,14 @@
 import socket
 import argparse
 from connection import SocketConnection
-from visualize import TerminalVisual
+from visualize import GUIVisual
 from logic import ChatLogic
-from user_input import TerminalInput
+from user_input import GUIInput
+import tkinter
+from tkinter import scrolledtext
 
+FONT = "Helvetica 14"
+FONT_BOLD = "Helvetica 13 bold"
 
 def main():
 	parser = argparse.ArgumentParser(prog='Chat', description='Делает чат')
@@ -57,7 +61,18 @@ def main():
 
 	# инициализация всех остальных модулей программы
 	# connection уже был создан либо по ветке клиента, либо по ветке сервера
-	visualize = TerminalVisual()
+	main_window = tkinter.Tk()
+	main_window.title("Chat")
+	main_window.resizable(False, False)
+
+	chat_text_widget = scrolledtext.ScrolledText(main_window, font=FONT, takefocus=0, width=60, state="disabled")
+	chat_text_widget.grid(row=0, column=0, columnspan=2)
+
+	message_entry = tkinter.Entry(main_window, font=FONT, width=55)
+	message_entry.grid(row=1, column=0)
+	message_entry.focus()
+
+	visualize = GUIVisual(chat_text_widget)
 
 	main_logic = ChatLogic(
 		login=args.login,
@@ -65,13 +80,24 @@ def main():
 		visualize=visualize,
 	)
 
-	user_input = TerminalInput(main_logic)
+	user_input = GUIInput(main_logic, message_entry)
+
+	message_entry_btn = tkinter.Button(
+		main_window,
+		text="Отправить",
+		font=FONT_BOLD,
+		command=user_input.on_text_entered,
+	)
+	message_entry_btn.grid(row=1, column=1)
+
+	def enter_event(_):
+		user_input.on_text_entered()
+
+	main_window.bind("<Return>", enter_event)
 
 	main_logic.start()
-	user_input.start()
 
-
-
+	main_window.mainloop()
 
 if __name__ == "__main__":
 	main()
